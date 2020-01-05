@@ -1,3 +1,9 @@
+// Segments in proc->gdt.
+#define NSEGS     7
+
+#define MAX_PSYC_PAGES 15
+#define MAX_TOTAL_PAGES 30
+
 // Per-CPU state
 struct cpu {
   uchar apicid;                // Local APIC ID
@@ -34,6 +40,19 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+struct pgdesc {
+  uint swaploc;
+  int age;
+  char *va;
+};
+
+struct freepg {
+  char *va;
+  int age;
+  struct freepg *next;
+  struct freepg *prev;
+};
+
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -49,6 +68,19 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //Swap file. must initiate with create swap file
+  struct file *swapFile;			//page file
+
+  int pagesinmem;             // No. of pages in physical memory
+  int pagesinswapfile;        // No. of pages in swap file
+  int totalPageFaultCount;    // Total number of page faults for this process
+  int totalPagedOutCount;     // Total number of pages that were placed in the swap file
+  struct freepg freepages[MAX_PSYC_PAGES];  // Pre-allocated space for the pages in physical memory linked list
+  struct pgdesc swappedpages[MAX_PSYC_PAGES];// Pre-allocated space for the pages in swap file array
+  struct freepg *head;        // Head of the pages in physical memory linked list
+  struct freepg *tail;        // End of the pages in physical memory linked list
 };
 
 // Process memory is laid out contiguously, low addresses first:
