@@ -670,7 +670,7 @@ nameiparent(char *path, char *name)
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////
 #include "fcntl.h"
 #define DIGITS 14
 
@@ -693,13 +693,14 @@ char* itoa(int i, char b[]){
     }while(i);
     return b;
 }
-//remove swap file of proc p;
+
+//remove swap file of proc 
 int
 removeSwapFile(struct proc* p)
 {
 	//path of proccess
 	char path[DIGITS];
-	memmove(path,"/.swap", 6);
+	memmove(path,"/.page", 6);
 	itoa(p->pid, path+ 6);
 
 	struct inode *ip, *dp;
@@ -761,7 +762,7 @@ removeSwapFile(struct proc* p)
 }
 
 
-//return 0 on success
+//create swap file for proc p
 int
 createSwapFile(struct proc* p)
 {
@@ -788,7 +789,7 @@ createSwapFile(struct proc* p)
     return 0;
 }
 
-//return as sys_write (-1 when error)
+//write data to swap file of proc p
 int
 writeToSwapFile(struct proc * p, char* buffer, uint placeOnFile, uint size)
 {
